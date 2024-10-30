@@ -17,7 +17,9 @@ CLOSE = "RA"    # RST-ACK
 
 queue = Queue()
 
-# TODO - Get Delay working, finish docs once done
+# TODO - Get Delay working
+# TODO - Handle network errors gracefully, including unreachable hosts and invalid IP addresses.
+# TODO - Finish docs
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
