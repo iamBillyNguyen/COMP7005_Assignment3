@@ -35,15 +35,6 @@ def parse_arguments():
 
     handle_arguments(args, parser)
 
-def is_valid_ip(address):
-    try:
-        # Try to create an IP address object from the provided address
-        ipaddress.ip_address(address)
-        return True
-    except ValueError:
-        return False
-
-
 def handle_arguments(args, parser):
     global IP_ADDRESS, LOWER_BOUND, UPPER_BOUND, DELAY
 
@@ -81,16 +72,13 @@ def handle_arguments(args, parser):
     print("End:\t\t", UPPER_BOUND)
     print("Delay:\t\t", DELAY)
 
-# def process_range():
-#     for port in range(LOWER_BOUND, UPPER_BOUND):
-#         queue.put(port)
-
-def dequeue_and_handle_port():
-    while not queue.empty():
-        port = queue.get()
-        scan_port(port)
-        queue.task_done()
-        time.sleep(DELAY)
+def is_valid_ip(address):
+    try:
+        # Try to create an IP address object from the provided address
+        ipaddress.ip_address(address)
+        return True
+    except ValueError:
+        return False
 
 def scan_port(port):
     ip_layer = IP(dst=IP_ADDRESS)
@@ -105,11 +93,18 @@ def scan_port(port):
             # open_ports.append(port)
             print(f"Port {port} is open.")
             # Send RST to gracefully close the connection
-            sr1( ip_layer / TCP(dport=port, flags="R"), timeout=1, verbose=False)
+            sr1(ip_layer / TCP(dport=port, flags="R"), timeout=1, verbose=False)
         elif response[TCP].flags == CLOSE:  # RST-ACK means closed
             print(f"Port {port} is closed.")
         else:
             print(f"Port {port} is filtered or dropped.")
+
+def dequeue_and_handle_port():
+    while not queue.empty():
+        port = queue.get()
+        scan_port(port)
+        queue.task_done()
+        time.sleep(DELAY)
 
 def queue_ports():
     for port in range(LOWER_BOUND, UPPER_BOUND+1):
@@ -129,5 +124,4 @@ def handle_scan_with_multi_threading(num_threads):
 if __name__ == "__main__":
     parse_arguments()
     queue_ports()
-    # Start multi-threaded scanning
     handle_scan_with_multi_threading(10)
