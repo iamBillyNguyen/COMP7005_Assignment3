@@ -85,7 +85,7 @@ def handle_arguments(args, parser):
 #     for port in range(LOWER_BOUND, UPPER_BOUND):
 #         queue.put(port)
 
-def worker():
+def dequeue_and_handle_port():
     while not queue.empty():
         port = queue.get()
         scan_port(port)
@@ -111,20 +111,23 @@ def scan_port(port):
         else:
             print(f"Port {port} is filtered or dropped.")
 
-if __name__ == "__main__":
-    parse_arguments()
-
+def queue_ports():
     for port in range(LOWER_BOUND, UPPER_BOUND+1):
         queue.put(port)
 
-    # Start multi-threaded scanning
-    num_threads = 10  # Adjust based on available resources
+def handle_scan_with_multi_threading(num_threads):
     threads = []
 
     for _ in range(num_threads):
-        t = threading.Thread(target=worker)
+        t = threading.Thread(target=dequeue_and_handle_port)
         t.start()
         threads.append(t)
 
     # Wait for all threads to finish
     queue.join()
+
+if __name__ == "__main__":
+    parse_arguments()
+    queue_ports()
+    # Start multi-threaded scanning
+    handle_scan_with_multi_threading(10)
