@@ -99,16 +99,16 @@ def scan_port(port):
         else:
             print(f"Port {port} is filtered or dropped.")
 
+def queue_ports():
+    for port in range(LOWER_BOUND, UPPER_BOUND+1):
+        queue.put(port)
+
 def dequeue_and_handle_port():
     while not queue.empty():
         port = queue.get()
         scan_port(port)
         queue.task_done()
         time.sleep(DELAY)
-
-def queue_ports():
-    for port in range(LOWER_BOUND, UPPER_BOUND+1):
-        queue.put(port)
 
 def handle_scan_with_multi_threading(num_threads):
     threads = []
