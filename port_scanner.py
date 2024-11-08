@@ -11,22 +11,16 @@ IP_ADDRESS = 0
 LOWER_BOUND = 1
 UPPER_BOUND = 65535
 DELAY = 0
-
 OPEN = "SA"     # SYN-ACK
 CLOSE = "RA"    # RST-ACK
-
 queue = Queue()
-
-# TODO - Get Delay working
-# TODO - Handle network errors gracefully, including unreachable hosts and invalid IP addresses.
-# TODO - Finish docs
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--ip", type=str, required=True, help="IP Address to scan ports on")
     parser.add_argument("-s", "--start", type=int, help="Lower bound of the port range to scan for (Default is 1)")
     parser.add_argument("-e", "--end", type=int, help="Higher bound of the port range to scan for (Default is 65535)")
-    parser.add_argument("-d", "--delay", type=int, help="Delay between scans in millisecond (Default is 0)")
+    parser.add_argument("-d", "--delay", type=int, help="Delay between scans in second (Default is 0)")
 
     try:
         args = parser.parse_args()
@@ -83,14 +77,20 @@ def is_valid_ip(address):
         return False
 
 def scan_port(port):
+    print(f"Scanning port {port}")
     ip_layer = IP(dst=IP_ADDRESS)
 
     tcp_layer = TCP(dport=port, flags="S")
     packet = ip_layer / tcp_layer
     response = sr1(packet, timeout=1, verbose=False)
-    print(f"Response: {response}")
 
-    if response and response.haslayer(TCP):
+    # If unable to scan port, send error message and return immediately
+    if response is None:
+        print(f"Unable to scan port {port}, please check if IP address is reachable.")
+        return None
+
+    # Else handle port
+    if response.haslayer(TCP):
         if response[TCP].flags == OPEN:  # SYN-ACK means open
             # open_ports.append(port)
             print(f"Port {port} is open.")
@@ -100,6 +100,8 @@ def scan_port(port):
             print(f"Port {port} is closed.")
         else:
             print(f"Port {port} is filtered or dropped.")
+    # Bonus feature: delay between each scan
+    time.sleep(DELAY)
 
 def queue_ports():
     for port in range(LOWER_BOUND, UPPER_BOUND+1):
@@ -110,7 +112,6 @@ def dequeue_and_handle_port():
         port = queue.get()
         scan_port(port)
         queue.task_done()
-        time.sleep(DELAY)
 
 def handle_scan_with_multi_threading(num_threads):
     threads = []
@@ -126,4 +127,11 @@ def handle_scan_with_multi_threading(num_threads):
 if __name__ == "__main__":
     parse_arguments()
     queue_ports()
-    handle_scan_with_multi_threading(10)
+
+    # Use multi-threading if there is no delay
+    thread_num = 3
+    # else use 1 thread to scan synchronously with a delay in-between
+    if DELAY > 0:
+        thread_num = 1
+
+    handle_scan_with_multi_threading(thread_num)
