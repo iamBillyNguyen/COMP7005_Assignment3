@@ -11,6 +11,7 @@ LOWER_BOUND = 1
 UPPER_BOUND = 65535
 OPEN = "SA"     # SYN-ACK
 CLOSE = "RA"    # RST-ACK
+MAX_THREAD = 3
 
 IP_ADDRESS = "0"
 START_PORT = LOWER_BOUND
@@ -36,7 +37,7 @@ def parse_arguments():
     handle_arguments(args, parser)
 
 def handle_arguments(args, parser):
-    global IP_ADDRESS, LOWER_BOUND, UPPER_BOUND, DELAY
+    global IP_ADDRESS, LOWER_BOUND, UPPER_BOUND, START_PORT, END_PORT, DELAY
 
     if is_valid_ip(args.ip):
         IP_ADDRESS = args.ip
@@ -133,7 +134,7 @@ if __name__ == "__main__":
     queue_ports()
 
     # Use multi-threading if there is no delay
-    thread_num = 3
+    thread_num = MAX_THREAD
     # else use 1 thread to scan synchronously with a delay in-between
     if DELAY > 0:
         thread_num = 1
