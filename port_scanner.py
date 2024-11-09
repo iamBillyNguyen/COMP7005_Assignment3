@@ -97,7 +97,6 @@ def scan_port(port):
     # Else handle port
     if response.haslayer(TCP):
         if response[TCP].flags == OPEN:  # SYN-ACK means open
-            # open_ports.append(port)
             print(f"Port {port} is open.")
             # Send RST to gracefully close the connection
             sr1(ip_layer / TCP(dport=port, flags="R"), timeout=1, verbose=False)
@@ -105,7 +104,6 @@ def scan_port(port):
             print(f"Port {port} is closed.")
         else:
             print(f"Port {port} is filtered or dropped.")
-    # Bonus feature: delay between each scan
     time.sleep(DELAY)
 
 def queue_ports():
