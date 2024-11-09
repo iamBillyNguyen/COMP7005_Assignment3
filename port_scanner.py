@@ -7,7 +7,7 @@ from scapy.all import *
 from queue import Queue
 from scapy.layers.inet import TCP, IP
 
-IP_ADDRESS = 0
+IP_ADDRESS = "0"
 LOWER_BOUND = 1
 UPPER_BOUND = 65535
 DELAY = 0
