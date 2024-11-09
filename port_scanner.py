@@ -7,12 +7,16 @@ from scapy.all import *
 from queue import Queue
 from scapy.layers.inet import TCP, IP
 
-IP_ADDRESS = "0"
 LOWER_BOUND = 1
 UPPER_BOUND = 65535
-DELAY = 0
 OPEN = "SA"     # SYN-ACK
 CLOSE = "RA"    # RST-ACK
+
+IP_ADDRESS = "0"
+START_PORT = LOWER_BOUND
+END_PORT = UPPER_BOUND
+DELAY = 0
+
 queue = Queue()
 
 def parse_arguments():
@@ -44,15 +48,15 @@ def handle_arguments(args, parser):
         if LOWER_BOUND > args.start > UPPER_BOUND:
             parser.print_help()
             sys.exit("Lower bound must be greater than or equal to 1.")
-        LOWER_BOUND = args.start
+        START_PORT = args.start
 
     if args.end is not None:
         if LOWER_BOUND > args.end > UPPER_BOUND:
             parser.print_help()
             sys.exit("Upper bound must be less than or equal to 65535.")
-        UPPER_BOUND = args.end
+        END_PORT = args.end
 
-    if LOWER_BOUND > UPPER_BOUND:
+    if START_PORT > END_PORT:
         parser.print_help()
         sys.exit("Lower bound must be less than upper bound.")
 
@@ -64,8 +68,8 @@ def handle_arguments(args, parser):
             DELAY = args.delay
 
     print("IP Address:\t", IP_ADDRESS)
-    print("Start:\t\t", LOWER_BOUND)
-    print("End:\t\t", UPPER_BOUND)
+    print("Start:\t\t", START_PORT)
+    print("End:\t\t", END_PORT)
     print("Delay:\t\t", DELAY)
 
 def is_valid_ip(address):
@@ -104,7 +108,7 @@ def scan_port(port):
     time.sleep(DELAY)
 
 def queue_ports():
-    for port in range(LOWER_BOUND, UPPER_BOUND+1):
+    for port in range(START_PORT, END_PORT+1):
         queue.put(port)
 
 def dequeue_and_handle_port():
