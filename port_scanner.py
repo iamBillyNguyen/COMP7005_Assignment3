@@ -82,7 +82,6 @@ def is_valid_ip(address):
         return False
 
 def scan_port(port):
-    print(f"Scanning port {port}")
     ip_layer = IP(dst=IP_ADDRESS)
 
     tcp_layer = TCP(dport=port, flags="S")
