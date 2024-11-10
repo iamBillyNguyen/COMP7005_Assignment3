@@ -46,15 +46,15 @@ def handle_arguments(args, parser):
         sys.exit("IP Address is not valid")
 
     if args.start is not None:
-        if LOWER_BOUND > args.start > UPPER_BOUND:
+        if LOWER_BOUND > args.start or args.start > UPPER_BOUND:
             parser.print_help()
-            sys.exit("Lower bound must be greater than or equal to 1.")
+            sys.exit("Lower bound must be greater than or equal to 1, and less than or equal to 65535.")
         START_PORT = args.start
 
     if args.end is not None:
-        if LOWER_BOUND > args.end > UPPER_BOUND:
+        if LOWER_BOUND > args.end or args.end > UPPER_BOUND:
             parser.print_help()
-            sys.exit("Upper bound must be less than or equal to 65535.")
+            sys.exit("Upper bound must be greater than or equal to 1, and less than or equal to 65535.")
         END_PORT = args.end
 
     if START_PORT > END_PORT:
